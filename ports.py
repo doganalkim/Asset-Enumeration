@@ -53,5 +53,7 @@ def portsResult(ip):
     with open('nmap_res.xml','r') as file:
         stringToParse = file.read()
 
+    subprocess.call('rm -rf nmap_res.xml', shell = True)
+
     root =  ET.fromstring(stringToParse)
     dfs(root)
