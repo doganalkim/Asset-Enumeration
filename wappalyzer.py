@@ -6,7 +6,10 @@ def wappalyzer(url):
     result = wappalyzer.analyze_with_versions_and_categories(webpage)
 
     for tech in result:
-        result[tech] = result[tech]['categories']
+        result[tech] = {
+            'Category': result[tech]['categories'],
+            'Version': result[tech]['versions']
+        }
     
     return result
 
