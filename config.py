@@ -5,6 +5,6 @@ subfinder_command = "subfinder -d {DOMAIN}"
 SPIDER_DEPTH = 1
 
 
-# Add the end of the command in order to block
+# Add at the end of the command in order to block
 # standard output to print anything
 STDOUT_DISABLE = ' >/dev/null 2>&1 ' 
