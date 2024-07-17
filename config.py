@@ -9,5 +9,5 @@ SPIDER_DEPTH = 1
 # standard output to print anything
 STDOUT_DISABLE = ' >/dev/null 2>&1 ' 
 
-dig_dns = "dig {domain}"
-dig_rev_dns = "dig -x {ip}"
+dig_dns = "dig +yaml {domain}"
+dig_rev_dns = "dig +yaml -x {ip}"
