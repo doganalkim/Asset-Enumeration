@@ -1,7 +1,7 @@
 import subprocess
 import yaml
 
-from config import dig_with_ip, dig_with_domain
+from config import dig_dns, dig_rev_dns
 
 def dig(domain: str = None, ip: str = None):
     # dns lookup
