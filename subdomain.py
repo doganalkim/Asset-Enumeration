@@ -14,9 +14,9 @@ class SubdomainTools:
         # reshape the output
         subdomains = subdomains.split('\n')[:-1]
 
-        self.add_to_dict(domain, subdomains)
+        self._add_to_dict(domain, subdomains)
 
-    def add_to_dict(self, domain, subdomains):
+    def _add_to_dict(self, domain, subdomains):
         if domain not in self.dct.keys():
             # create key value pair
             self.dct[domain] = subdomains
