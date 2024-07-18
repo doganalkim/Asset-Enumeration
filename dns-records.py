@@ -27,22 +27,25 @@ def dig(domain: str = None, ip: str = None):
         raise e
         
     if domain:
-        _extract_ip(answer, domain)
+        return [dns_response] + list(_extract_ip(answer, domain))
     
-    return [dns_response, ips, ips[0]]
+    return [dns_response, [], '']
 
 def _extract_ip(ans: list, domain):
     ips = []
-    
+    the_best_ip = ''
+
     for i in ans:
         ips.append(i.split('IN A ')[-1])
 
     # the ip ping command chooses to send packets inserted to the head of list 
     if domain:
-        the_best_ip = subprocess.check_output(f'ping -c 2 {domain}', shell=True)
+        cmd_out = subprocess.check_output(f'ping -c 2 {domain}', shell=True).decode()
+        the_best_ip = cmd_out[cmd_out.find('(') + 1:cmd_out.find(')')]
         ips.remove(the_best_ip)
         ips.insert(0, the_best_ip)
 
+    return ips, the_best_ip
 
 if __name__=='__main__':
-    a = (dig('acunn.com'))
+    print(dig('examplenoktacom'))
