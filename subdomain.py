@@ -25,11 +25,13 @@ class SubdomainTools:
             self.dct[domain] = list(set(dct[domain] + subdomains))
 
     def get_subdomain_json(self):
-        return json.dumps(self.dct)
+        # Use one of below ( either dictionary or json)
+        return self.dct
+        #return json.dumps(self.dct)
 
 
 # for testing purposes
 if __name__=='__main__':
     st = SubdomainTools()
-    st.subfinder('example.com')
+    st.subfinder('yandex.com')
     print(st.get_subdomain_json())

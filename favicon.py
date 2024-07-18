@@ -4,6 +4,7 @@ import codecs
 import shodan
 
 def url(n):
+    n += '/favicon.ico'
     response = requests.get(n,verify=False)
     favicon = codecs.encode(response.content, 'base64')
     hash = mmh3.hash(favicon)

@@ -1,9 +1,13 @@
 import subprocess
 import yaml
+import json
 
 from config import dig_dns, dig_rev_dns
 
 def dig(domain: str = None, ip: str = None):
+    if not domain and not ip:
+        raise Exception('Error: provide domain or IP')
+    
     # dns lookup
     if domain:
         cmd_output = subprocess.check_output(dig_dns.format(domain=domain), shell=True)
@@ -19,4 +23,4 @@ def dig(domain: str = None, ip: str = None):
 
     
 if __name__=='__main__':
-    print(dig(domain='example.com'))
+    a = (dig('acunn.com'))
