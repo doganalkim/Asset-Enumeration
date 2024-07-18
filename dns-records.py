@@ -27,11 +27,11 @@ def dig(domain: str = None, ip: str = None):
         raise e
         
     if domain:
-        _extract_ip(answer)
+        _extract_ip(answer, domain)
     
     return [dns_response, ips, ips[0]]
 
-def _extract_ip(ans: List, domain):
+def _extract_ip(ans: list, domain):
     ips = []
     
     for i in ans:
@@ -39,7 +39,7 @@ def _extract_ip(ans: List, domain):
 
     # the ip ping command chooses to send packets inserted to the head of list 
     if domain:
-        the_best_ip = subdomain.check_output(f'ping -c 2 {domain}')
+        the_best_ip = subprocess.check_output(f'ping -c 2 {domain}', shell=True)
         ips.remove(the_best_ip)
         ips.insert(0, the_best_ip)
 
