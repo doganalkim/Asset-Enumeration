@@ -1,19 +1,25 @@
 import subprocess
 import json
+from config import STDOUT_DISABLE
+
+DP = {}
 
 # This is the main function that takes the ip as parameter
 def portsResult(ip):
+    if ip in DP.keys():
+        return DP[ip]
 
-    command = f'sudo masscan {ip} --top-ports 1000 -oJ masscan_out.json --wait 0 >/dev/null 2>&1'
+    command = f'sudo masscan {ip} --top-ports 100 -oJ ./tmp/masscan_out.json --wait 0' + STDOUT_DISABLE
     subprocess.check_output(command, shell = True)
 
-    with open('masscan_out.json','r') as file:
+    with open('./tmp/masscan_out.json','r') as file:
         dict_list = json.loads(file.read())
     
+    subprocess.call('rm -rf ./tmp/masscan_out.json', shell = True)
 
-    # subprocess.call('rm -rf masscan_out.xml', shell = True)
+    DP[ip] = dict_list
 
-    return dct
+    return dict_list
 
 if __name__=="__main__":
     resultDictArray = portsResult("142.250.184.142")

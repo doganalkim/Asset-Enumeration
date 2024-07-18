@@ -7,8 +7,6 @@ import json
 # This code segment returns the result of the whois as json format #
 ####################################################################
 
-whoisDictResult = {}   # Initializing as an empty dictionary
-
 
 # These arrays are some of the exceptions to exclude from resulting match.
 # These arrays can be manipulated for exclusion in the future.
@@ -27,6 +25,7 @@ ValueExceptions = [\
 
 def parse(stringToParse):
     global KeyExceptions, ValueExceptions
+    whoisDictResult = {}   # Initializing as an empty dictionary
     searchResult = re.findall("\s*>*\s*(.*): (.*)", stringToParse)
     for i in range(len(searchResult)):
         key = searchResult[i][0]
@@ -34,7 +33,7 @@ def parse(stringToParse):
         if key not in KeyExceptions and \
                 value not in ValueExceptions:                               # If not in exceptions
             whoisDictResult.update({key:value})                             # Add to dictionary for each element
-
+    return whoisDictResult
     #return json.dumps(DictResult, indent=4)                                # result is json
 
 # USE THIS FUNCTION TO GET THE RESULT
@@ -43,7 +42,7 @@ def whoisResult(url):
     # Execute whois
     command = 'whois ' + url
     whoisOutput = subprocess.check_output(command, shell=True).decode()
-    parse(whoisOutput)
+    return parse(whoisOutput)
 
 # Below functions can be used to expand exceptions
 def addKeyException(key):
@@ -51,3 +50,10 @@ def addKeyException(key):
 
 def addValueException(value):
     ValueExceptions.append(value)
+
+
+if __name__=='__main__':
+    print(whoisResult('example.com'))
+
+
+# timeout!!

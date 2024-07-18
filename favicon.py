@@ -39,4 +39,6 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    #main()
+    x=url("https://python.org")
+    api(x,True,"cZDG3xexLwRShMxzDLYHENtiOxUAqFV1")

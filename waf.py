@@ -8,31 +8,39 @@ import json
 # purpose. None implies no firewall               #
 ###################################################
 
-WAF_RESULT = None
 
 def parse_file():
-    global WAF_RESULT
     with open('./tmp/waf_res.json','r') as file:
-        WAF_RESULT = json.loads(file.read())[0]['firewall']
+        file_content = file.read()
+        if file_content:
+            json_content = json.loads(file_content)
+            if json_content != []:
+                check_string = json_content[0]
+                if check_string and 'firewall' in check_string:
+                    WAF_RESULT = check_string['firewall']
+                    return WAF_RESULT
+    return None
+
 
 # This is the main function
 # Takes URL as parameter
 # Result is stored as the variable 'WAF_RESULT'
 # Consider the ./tmp folder issue later on
 def handle_waf(url):
-    global WAF_RESULT
 
     # Uncomment below to test during integration
     # Output for the tool wafw00f is disabled
     #WAF_COMMAND = 'wafw00f ' + url + ' -o ./tmp/waf_res.json ' + config.STDOUT_DISABLE
-    WAF_COMMAND = 'wafw00f ' + url+ ' -o ./tmp/waf_res.json' + ' >/dev/null 2>&1 '
+    WAF_COMMAND = 'wafw00f ' + url + ' -o ./tmp/waf_res.json' + ' >/dev/null 2>&1 '
 
     subprocess.call(WAF_COMMAND, shell = True)
 
-    parse_file()
+    WAF_RESULT = parse_file()
 
     # Delete the temporary file
     subprocess.call('rm -rf ./tmp/waf_res.json', shell = True)
+
+    return WAF_RESULT
 
     # Below part can be used to eliminate false negatives of the tools
     #if not WAF_RESULT:
@@ -40,5 +48,4 @@ def handle_waf(url):
 
 # Below is for the testing. REMOVE IT
 if __name__ == '__main__':
-    handle_waf('stackoverflow.com')
-    print(WAF_RESULT)
+    print(handle_waf('stackoverflow.com'))

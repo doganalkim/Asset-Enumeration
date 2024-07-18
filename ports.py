@@ -57,3 +57,7 @@ def portsResult(ip):
 
     root =  ET.fromstring(stringToParse)
     dfs(root)
+
+if __name__=="__main__":
+    portsResult("google.com")
+    print(resultDictArray)
