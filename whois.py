@@ -53,7 +53,7 @@ def addValueException(value):
 
 
 if __name__=='__main__':
-    print(whoisResult('example.com'))
+    print(whoisResult('testhtml5.vulnweb.com'))
 
 
 # timeout!!

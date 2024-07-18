@@ -47,6 +47,7 @@ def find_subdomain(url):
     new_dict = {}
     new_dict['domain'] = url
     new_dict['path'] = './Subdomains/' + url + '.json'
+    new_dict['whois'] = whois.whoisResult(url)
     new_dict['subdomains'] = subdomain_result[url]
 
     with open('./Result/domain.json','w') as file:
@@ -75,7 +76,6 @@ def subdomain_filler(sd, domain):
     if dict_res['Primary IP']: 
         dict_res['ports'] = masscan.portsResult(dict_res['Primary IP'])
 
-    #dict_res['whois'] = whois.whoisResult(sd)
 
     print(dict_res)
 
@@ -98,11 +98,11 @@ def main():
 
     try:
         # Remove the result and temporary folders and create them back
-        #subprocess.call('rm -rf tmp && mkdir tmp && rm -rf Result && mkdir Result \
-        #                && mkdir ./Result/Subdomains', shell = True)
+        subprocess.call('rm -rf tmp && mkdir tmp && rm -rf Result && mkdir Result \
+                        && mkdir ./Result/Subdomains', shell = True)
 
 
-        #find_subdomain(URL)
+        find_subdomain(URL)
 
         subdomain_json_filler()
 
