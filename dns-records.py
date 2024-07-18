@@ -19,8 +19,30 @@ def dig(domain: str = None, ip: str = None):
 
     lst = yaml.unsafe_load(cmd_output)
 
-    return lst[0]['message']['response_message_data']
-
+    dns_response = lst[0]['message']['response_message_data']
+    try:
+        answer = dns_response['ANSWER_SECTION']
+    except Exception as e:
+        # domain not available, no answer
+        raise e
+        
+    if domain:
+        _extract_ip(answer)
     
+    return [dns_response, ips, ips[0]]
+
+def _extract_ip(ans: List, domain):
+    ips = []
+    
+    for i in ans:
+        ips.append(i.split('IN A ')[-1])
+
+    # the ip ping command chooses to send packets inserted to the head of list 
+    if domain:
+        the_best_ip = subdomain.check_output(f'ping -c 2 {domain}')
+        ips.remove(the_best_ip)
+        ips.insert(0, the_best_ip)
+
+
 if __name__=='__main__':
     a = (dig('acunn.com'))
