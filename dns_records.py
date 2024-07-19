@@ -17,6 +17,9 @@ def dig(domain: str = None, ip: str = None):
         # not implemented yet
         cmd_output = subprocess.check_output(dig_rev_dns.format(ip=ip), shell=True)
 
+    if 'response_message_data' not in cmd_output.decode():
+        return []
+
     lst = yaml.unsafe_load(cmd_output)
 
     dns_response = lst[0]['message']['response_message_data']
@@ -28,7 +31,7 @@ def dig(domain: str = None, ip: str = None):
         
     if domain:
         return [dns_response] + list(_extract_ip(answer, domain))
-    
+
     return [dns_response, [], '']
 
 def _extract_ip(ans: list, domain):
@@ -41,14 +44,18 @@ def _extract_ip(ans: list, domain):
     if len(ips) == 0:
         return ips, the_best_ip
 
-    # the ip ping command chooses to send packets inserted to the head of list 
-    if domain:
-        cmd_out = subprocess.check_output(f'ping -c 2 {domain}', shell=True).decode()
-        the_best_ip = cmd_out[cmd_out.find('(') + 1:cmd_out.find(')')]
-        ips.remove(the_best_ip)
-        ips.insert(0, the_best_ip)
+    try:
+        # the ip ping command chooses to send packets inserted to the head of list
+        if domain:
+            cmd_out = subprocess.check_output(f'ping -c 2 {domain}', shell=True).decode()
+            the_best_ip = cmd_out[cmd_out.find('(') + 1:cmd_out.find(')')]
+            ips.remove(the_best_ip)
+            ips.insert(0, the_best_ip)
 
-    return ips, the_best_ip
+        return ips, the_best_ip
+    except Exception as e:
+        print(f'DNS records threw the exception: {e}')
+        return []
 
 if __name__=='__main__':
     print(dig('examplenoktacom'))

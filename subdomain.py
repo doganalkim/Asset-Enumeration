@@ -22,7 +22,7 @@ class SubdomainTools:
             self.dct[domain] = subdomains
         else:
             # append subdomains to existing subdomains
-            self.dct[domain] = list(set(dct[domain] + subdomains))
+            self.dct[domain] = list(set(self.dct[domain] + subdomains))
 
     def get_subdomain_json(self):
         # Use one of below ( either dictionary or json)

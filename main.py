@@ -1,6 +1,5 @@
 # LIBRARIES
 import argparse
-import favicon
 from config import SHODAN_API_KEY
 import subprocess
 import json
@@ -12,10 +11,12 @@ import dns_records
 import waf
 import masscan
 import whois
+import wappalyzer
+import shodan_tools
 
 URL = None
 IS_SHODAN_USED = False
-SUBDOMAIN_ARRAY = []
+SUBDOMAIN_ARRAY_RESULT = []
 
 
 def parse_args():
@@ -38,7 +39,7 @@ def parse_args():
     if URL:
         IS_SHODAN_USED = args.shodan
 
-# Subdomain script caller function
+# Subdomain script caller function ( level 1 json creator )
 def find_subdomain(url):
     st = subdomain.SubdomainTools()
     st.subfinder(url)
@@ -53,7 +54,7 @@ def find_subdomain(url):
     with open('./Result/domain.json','w') as file:
         json.dump(new_dict, file, indent = 4)
 
-
+# Level 2 json creator
 def subdomain_filler(sd, domain):
     # Create the dictionary
     print(sd)
@@ -62,31 +63,49 @@ def subdomain_filler(sd, domain):
     dict_res['subdomain name'] = sd
 
     # UNCOMMENT THEM TO TEST IT
-    #dns_records_result = dns_records.dig(sd)
+    dns_records_result = dns_records.dig(sd)
 
-    #dict_res['DNS'] = dns_records_result[0]
+    dict_res['Primary IP'] = None
 
-    #dict_res['IPs'] = dns_records_resukt[1]
+    # If the result is non empty array.
+    # This means if everything goes well
+    if dns_records_result != []:
+        dict_res['DNS'] = dns_records_result[0]
 
-    #dict_res['Primary IP'] = dns_records_result[2]
-    dict_res['Primary IP'] = '185.199.111.153'
+        dict_res['IPs'] = dns_records_result[1]
+
+        dict_res['Primary IP'] = dns_records_result[2]
 
     dict_res['WAF'] = waf.handle_waf(sd)
+
+    if dict_res['Primary IP']:
+        dict_res['Web Technologies'] = wappalyzer.wappalyzer(sd)
 
     if dict_res['Primary IP']: 
         dict_res['ports'] = masscan.portsResult(dict_res['Primary IP'])
 
 
-    print(dict_res)
+    #print(dict_res)
 
-    #return dict_res
+    return dict_res
+
+# Level 3 json creator
+def endpoint_filler(sd):
+    return None
 
 def subdomain_json_filler():
     with open('./Result/domain.json','r') as file:
         SUBDOMAIN_LIST = json.loads(file.read())['subdomains']
     
     for subdomain in SUBDOMAIN_LIST:
-        subdomain_filler(subdomain,URL)
+        try:
+            SUBDOMAIN_ARRAY_RESULT.append(subdomain_filler(subdomain,URL))
+        except Exception as e:
+            print(f'{e}')
+            continue
+
+    with open('./Result/Subdomains/subdomains.json','w') as file:
+    	json.dump(SUBDOMAIN_ARRAY_RESULT, file, indent = 4)
 
 
 def main():
@@ -101,9 +120,10 @@ def main():
         subprocess.call('rm -rf tmp && mkdir tmp && rm -rf Result && mkdir Result \
                         && mkdir ./Result/Subdomains', shell = True)
 
-
+        # This is for level 1 json file
         find_subdomain(URL)
 
+        # This is for level 2 json file
         subdomain_json_filler()
 
         """

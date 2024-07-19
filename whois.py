@@ -39,10 +39,14 @@ def parse(stringToParse):
 # USE THIS FUNCTION TO GET THE RESULT
 # Required parameter is the URL of the target
 def whoisResult(url):
-    # Execute whois
-    command = 'whois ' + url
-    whoisOutput = subprocess.check_output(command, shell=True).decode()
-    return parse(whoisOutput)
+    try:
+        # Execute whois
+        command = 'whois ' + url
+        whoisOutput = subprocess.check_output(command, shell=True).decode()
+        return parse(whoisOutput)
+    except Exception as e:
+        print(f'whois threw the exception: {e}')
+        return None
 
 # Below functions can be used to expand exceptions
 def addKeyException(key):

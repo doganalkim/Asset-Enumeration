@@ -27,24 +27,27 @@ def parse_file():
 # Result is stored as the variable 'WAF_RESULT'
 # Consider the ./tmp folder issue later on
 def handle_waf(url):
+    try:
+        # Uncomment below to test during integration
+        # Output for the tool wafw00f is disabled
+        #WAF_COMMAND = 'wafw00f ' + url + ' -o ./tmp/waf_res.json ' + config.STDOUT_DISABLE
+        WAF_COMMAND = 'wafw00f ' + url + ' -o ./tmp/waf_res.json' + ' >/dev/null 2>&1 '
 
-    # Uncomment below to test during integration
-    # Output for the tool wafw00f is disabled
-    #WAF_COMMAND = 'wafw00f ' + url + ' -o ./tmp/waf_res.json ' + config.STDOUT_DISABLE
-    WAF_COMMAND = 'wafw00f ' + url + ' -o ./tmp/waf_res.json' + ' >/dev/null 2>&1 '
+        subprocess.call(WAF_COMMAND, shell = True)
 
-    subprocess.call(WAF_COMMAND, shell = True)
+        WAF_RESULT = parse_file()
 
-    WAF_RESULT = parse_file()
+        # Delete the temporary file
+        subprocess.call('rm -rf ./tmp/waf_res.json', shell = True)
 
-    # Delete the temporary file
-    subprocess.call('rm -rf ./tmp/waf_res.json', shell = True)
+        return WAF_RESULT
 
-    return WAF_RESULT
-
-    # Below part can be used to eliminate false negatives of the tools
-    #if not WAF_RESULT:
-    #    WAF_RESULT = 'Could not be detected'
+        # Below part can be used to eliminate false negatives of the tools
+        #if not WAF_RESULT:
+        #    WAF_RESULT = 'Could not be detected'
+    except Exception as e:
+        print(f'WAF threw the exception: {e}')
+        return None
 
 # Below is for the testing. REMOVE IT
 if __name__ == '__main__':
