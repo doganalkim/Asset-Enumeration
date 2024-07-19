@@ -163,3 +163,4 @@ cython_debug/
 
 Result/
 tmp/
+.idea/
