@@ -9,6 +9,7 @@ serviceKeys = [
     'name',
     'product',
     'version',
+    'service'
     ]
 
 # Function for parsing service
@@ -47,17 +48,21 @@ def dfs(node):
 # This is the main function that takes the ip as parameter
 def portsResult(ip):
 
-    command = 'sudo nmap -Pn -sV -sT -oX nmap_res.xml  ' + ip + ' >/dev/null 2>&1'
+    global resultDictArray
+    resultDictArray = []
+
+    command = 'sudo nmap -Pn -sT -sV -p 80,443 -oX ./tmp/nmap_res.xml  ' + ip #+ ' >/dev/null 2>&1 '
     subprocess.call(command, shell = True)
 
-    with open('nmap_res.xml','r') as file:
+    with open('./tmp/nmap_res.xml','r') as file:
         stringToParse = file.read()
 
-    subprocess.call('rm -rf nmap_res.xml', shell = True)
+    subprocess.call('rm -rf ./tmp/nmap_res.xml', shell = True)
 
     root =  ET.fromstring(stringToParse)
     dfs(root)
 
+    return resultDictArray
+
 if __name__=="__main__":
-    portsResult("google.com")
-    print(resultDictArray)
+    print(portsResult("geeksforgeeks.com"))

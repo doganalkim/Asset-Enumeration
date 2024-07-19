@@ -20,7 +20,7 @@ def wappalyzer(domain):
         try:
             webpage = WebPage.new_from_url(scheme + domain)
         except Exception as e:
-            print(e)
+            print(f'Wapalyzer threw exception: {e}')
             continue
             
         wapp_out = wappalyzer.analyze_with_versions_and_categories(webpage)
