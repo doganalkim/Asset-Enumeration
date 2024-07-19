@@ -38,6 +38,9 @@ def _extract_ip(ans: list, domain):
     for i in ans:
         ips.append(i.split('IN A ')[-1])
 
+    if len(ips) == 0:
+        return ips, the_best_ip
+
     # the ip ping command chooses to send packets inserted to the head of list 
     if domain:
         cmd_out = subprocess.check_output(f'ping -c 2 {domain}', shell=True).decode()
