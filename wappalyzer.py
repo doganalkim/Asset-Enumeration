@@ -17,7 +17,12 @@ def wappalyzer(domain):
     wappalyzer = Wappalyzer.latest()
 
     for scheme in schemes:
-        webpage = WebPage.new_from_url(scheme + domain)
+        try:
+            webpage = WebPage.new_from_url(scheme + domain)
+        except Exception as e:
+            print(e)
+            continue
+            
         wapp_out = wappalyzer.analyze_with_versions_and_categories(webpage)
 
         for tech in wapp_out:
@@ -32,5 +37,5 @@ def wappalyzer(domain):
 
 # for testing purposes
 if __name__=='__main__':
-    result = wappalyzer('toscrape.com')
+    result = wappalyzer('antivirus1.vulnweb.com')
     print(result)
