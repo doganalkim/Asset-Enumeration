@@ -13,10 +13,11 @@ import masscan
 import whois
 import wappalyzer
 import shodan_tools
+from endpoint import EndpointScanTools
 
 URL = None
 IS_SHODAN_USED = False
-SUBDOMAIN_ARRAY_RESULT = []
+SUBDOMAINS = []
 
 
 def parse_args():
@@ -41,6 +42,8 @@ def parse_args():
 
 # Subdomain script caller function ( level 1 json creator )
 def find_subdomain(url):
+    global SUBDOMAINS
+
     st = subdomain.SubdomainTools()
     st.subfinder(url)
     subdomain_result = st.get_subdomain_json()
@@ -50,6 +53,7 @@ def find_subdomain(url):
     new_dict['path'] = './Subdomains/' + url + '.json'
     new_dict['whois'] = whois.whoisResult(url)
     new_dict['subdomains'] = subdomain_result[url]
+    SUBDOMAINS = subdomain_result[url]
 
     with open('./Result/domain.json','w') as file:
         json.dump(new_dict, file, indent = 4)
@@ -90,26 +94,46 @@ def subdomain_filler(sd, domain):
     return dict_res
 
 # Level 3 json creator
-def endpoint_filler(sd):
-    return None
+def endpoint_json_filler():
+    global SUBDOMAINS
+    endpoints = []
+
+    subdomain_list = SUBDOMAINS
+    
+    est = EndpointScanTools()
+
+    for subdomain in subdomain_list:
+        try:
+            est.scrapy(allowed_domains=subdomain_list, start_urls=[f'http://{subdomain}'])
+
+        except Exception as e:
+            print(f'{e}')
+            continue
+
+        with open('tmp/endpoints.txt') as f:
+            endpoints = f.read().split('\n')
+
+        with open(f'./Result/Subdomains/{subdomain}.json','w') as file:
+            json.dump({subdomain: endpoints}, file, indent = 4)
 
 def subdomain_json_filler():
-    with open('./Result/domain.json','r') as file:
-        SUBDOMAIN_LIST = json.loads(file.read())['subdomains']
+    global SUBDOMAINS
+    subdomain_array_result = []
+
+    subdomain_list = SUBDOMAINS
     
-    for subdomain in SUBDOMAIN_LIST:
+    for subdomain in subdomain_list:
         try:
-            SUBDOMAIN_ARRAY_RESULT.append(subdomain_filler(subdomain,URL))
+            subdomain_array_result.append(subdomain_filler(subdomain,URL))
         except Exception as e:
             print(f'{e}')
             continue
 
     with open('./Result/Subdomains/subdomains.json','w') as file:
-    	json.dump(SUBDOMAIN_ARRAY_RESULT, file, indent = 4)
+    	json.dump(subdomain_array_result, file, indent = 4)
 
 
 def main():
-
     parse_args()
 
     if not URL:
@@ -125,6 +149,9 @@ def main():
 
         # This is for level 2 json file
         subdomain_json_filler()
+
+        # Level 3 json file. endpoints for each subdomain
+        endpoint_json_filler()
 
         """
         if args.n:

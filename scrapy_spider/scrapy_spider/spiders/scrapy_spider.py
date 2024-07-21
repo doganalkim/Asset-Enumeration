@@ -4,7 +4,7 @@ from scrapy.linkextractors import LinkExtractor
 from urllib.parse import urlparse
 
 
-SPIDER_DEPTH = 100
+SPIDER_DEPTH = 3
 
 
 class SubdomainSpider(CrawlSpider):
@@ -51,5 +51,5 @@ class SubdomainSpider(CrawlSpider):
                 yield response.follow(link.url, self.parse_item)
 
     def closed(self, reason):
-        with open('endpoints.txt', 'w') as f:
+        with open('tmp/endpoints.txt', 'w') as f:
             f.write('\n'.join(self.visited_urls.keys()))
