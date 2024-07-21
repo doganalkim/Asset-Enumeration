@@ -17,12 +17,8 @@ class SubdomainTools:
         self._add_to_dict(domain, subdomains)
 
     def _add_to_dict(self, domain, subdomains):
-        if domain not in self.dct.keys():
-            # create key value pair
-            self.dct[domain] = subdomains
-        else:
-            # append subdomains to existing subdomains
-            self.dct[domain] = list(set(self.dct[domain] + subdomains))
+        # create key value pair
+        self.dct[domain] = list(set(subdomains + [domain]))
 
     def get_subdomain_json(self):
         # Use one of below ( either dictionary or json)
