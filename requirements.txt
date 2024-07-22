@@ -1,5 +1,9 @@
+beautifulsoup4==4.12.3
+itemadapter==0.9.0
 mmh3==4.1.0
-scrapy==2.11.2
+python3_Wappalyzer==0.1.22
+PyYAML==6.0.1
+Requests==2.32.3
+Scrapy==2.11.2
 shodan==1.28.0
-python-Wappalyzer==0.3.1
-requests==2.32.3
+Wappalyzer==1.0
