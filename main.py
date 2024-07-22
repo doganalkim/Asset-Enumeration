@@ -112,7 +112,7 @@ def subdomain_filler(sd, domain):
     dict_res['WAF'] = waf.handle_waf(sd)
 
     if dict_res['Primary IP']:
-        dict_res['Web Technologies'] = wappalyzer.wappalyzer(sd)
+        dict_res['Web Technologies'], dict_res['Title'] = wappalyzer.wappalyzer(sd)
 
     if dict_res['Primary IP']: 
         dict_res['ports'] = masscan.portsResult(dict_res['Primary IP'])
