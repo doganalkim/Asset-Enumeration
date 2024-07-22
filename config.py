@@ -11,4 +11,4 @@ SPIDER_DEPTH = 1
 dig_dns = "dig +yaml {domain}"
 dig_rev_dns = "dig +yaml -x {ip}"
 
-SHODAN_API_KEY = ''
+SHODAN_API_KEY = "" #'UXFGk1nriNYhnGVLXsyRBrhEBKXMONzr'

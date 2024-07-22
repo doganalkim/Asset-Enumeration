@@ -14,11 +14,13 @@ import whois
 import wappalyzer
 import shodan_tools
 from endpoint import EndpointScanTools
+import shodan_tools
+import config
 
 URL = None
 IS_SHODAN_USED = False
 SUBDOMAINS = []
-
+FAV_HASH = None
 
 def parse_args():
     global URL
@@ -40,9 +42,21 @@ def parse_args():
     if URL:
         IS_SHODAN_USED = args.shodan
 
+
+def shodan_api_caller(fav_hash):
+    if fav_hash and config.SHODAN_API_KEY != '':
+    	dict_result = shodan_tools.api(fav_hash, True, config.SHODAN_API_KEY ) 
+    	with open('./Result/Shodan/favicon_result.json','w') as file:
+    	    json.dump(dict_result, file, indent = 4)
+    else:
+    	return None
+
+	
 # Subdomain script caller function ( level 1 json creator )
 def find_subdomain(url):
-    global SUBDOMAINS
+    global SUBDOMAINS, FAV_HASH
+
+    shodan_subdomain_filler(url)
 
     st = subdomain.SubdomainTools()
     st.subfinder(url)
@@ -50,6 +64,9 @@ def find_subdomain(url):
 
     new_dict = {}
     new_dict['domain'] = url
+    new_dict["favicon hash"] = shodan_tools.url(url)
+    FAV_HASH = new_dict["favicon hash"] 
+    shodan_api_caller(FAV_HASH)
     new_dict['path'] = './Subdomains/' + url + '.json'
     new_dict['whois'] = whois.whoisResult(url)
     new_dict['subdomains'] = subdomain_result[url]
@@ -57,11 +74,23 @@ def find_subdomain(url):
 
     with open('./Result/domain.json','w') as file:
         json.dump(new_dict, file, indent = 4)
+    #print(new_dict)
+    
+def shodan_subdomain_filler(url):
+    if config.SHODAN_API_KEY !="":
+        dict_result = shodan_tools.sub_osint( config.SHODAN_API_KEY , url)
+        if 'total' in dict_result.keys() and dict_result['total'] > 0:
+            with open('./Result/Shodan/'+url+'.json', 'w') as file:
+                json.dump(dict_result, file, indent = 4)
+
 
 # Level 2 json creator
 def subdomain_filler(sd, domain):
     # Create the dictionary
     print(sd)
+    
+    shodan_subdomain_filler(sd)
+    
     dict_res = {} #create_dict()
     dict_res['main-domain'] = domain
     dict_res['subdomain name'] = sd
@@ -142,7 +171,8 @@ def main():
     try:
         # Remove the result and temporary folders and create them back
         subprocess.call('rm -rf tmp && mkdir tmp && rm -rf Result && mkdir Result \
-                        && mkdir ./Result/Subdomains', shell = True)
+                        && mkdir ./Result/Subdomains \
+                        && mkdir ./Result/Shodan', shell = True)
 
         # This is for level 1 json file
         find_subdomain(URL)
@@ -153,15 +183,6 @@ def main():
         # Level 3 json file. endpoints for each subdomain
         endpoint_json_filler()
 
-        """
-        if args.n:
-            test = favicon.url(n=args.n)
-
-            if args.shodan:
-                favicon.api(favhash=str(test), use_api_key=True, api_key=args.api_key)
-            else:
-                favicon.api(use_api_key=False)
-        """
     except Exception as e:
         print(e)
 
