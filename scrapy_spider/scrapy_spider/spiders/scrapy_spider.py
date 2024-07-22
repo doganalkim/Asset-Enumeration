@@ -2,6 +2,7 @@ import scrapy
 from scrapy.spiders import CrawlSpider, Rule
 from scrapy.linkextractors import LinkExtractor
 from urllib.parse import urlparse
+import re
 
 
 SPIDER_DEPTH = 3
@@ -24,6 +25,9 @@ class SubdomainSpider(CrawlSpider):
         # visited urls as a key and visit number as value
         # also added +1 to visit number of one step above endpoint 
         self.visited_urls = dict()
+        self.found_emails = set()
+
+        self.email_regex = re.compile(r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}')
 
     def parse_item(self, response):
         for link in LinkExtractor(allow=(), unique=True).extract_links(response):
@@ -39,7 +43,6 @@ class SubdomainSpider(CrawlSpider):
                 self.visited_urls[link.url] = 1
 
                 above_url = '/'.join(link.url.split('/')[:-1]) + '/'
-                
 
                 if above_url in self.visited_urls:
                     if self.visited_urls[above_url] > SPIDER_DEPTH:
@@ -49,7 +52,20 @@ class SubdomainSpider(CrawlSpider):
                     self.visited_urls[above_url] = 1
 
                 yield response.follow(link.url, self.parse_item)
+        
+        self.extract_emails(response)
+
+    def extract_emails(self, response):
+        emails = self.email_regex.findall(response.text)
+        self.found_emails.update(emails)
 
     def closed(self, reason):
         with open('tmp/endpoints.txt', 'w') as f:
             f.write('\n'.join(self.visited_urls.keys()))
+        with open('tmp/emails.txt', 'w') as f:
+            f.write('\n'.join(self.found_emails))
+
+        print(f"Spider closed: {reason}")
+        print(f"Total emails found: {len(self.found_emails)}")
+        print(f"URLs visited: {len(self.visited_urls)}")
+        print(f"Emails and URLs saved to tmp directory")
