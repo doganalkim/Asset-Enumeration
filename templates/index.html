@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Run Script</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.3.2/socket.io.min.js"></script>
+</head>
+<body>
+    <h1>Run Python Script</h1>
+    <label for="args">Arguments (comma separated): </label>
+    <input type="text" id="args" placeholder="arg1 arg2 arg3">
+    <button onclick="runScript()">Run Script</button>
+    <pre id="output"></pre>
+    <script>
+        const socket = io();
+
+        function runScript() {
+            document.getElementById('output').textContent = '';  // Clear previous output
+            const argsInput = document.getElementById('args').value;
+            const args = argsInput.split(' ').map(arg => arg.trim());
+
+            socket.emit('run_script', { args: args });
+        }
+
+        socket.on('script_output', function(msg) {
+            const outputElement = document.getElementById('output');
+            outputElement.textContent += msg.output + '\n';
+        });
+    </script>
+</body>
+</html>

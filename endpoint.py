@@ -23,6 +23,7 @@ def entry(url, allowed_domains):
 
     est = endpoint.EndpointScanTools()
     est.scrapy(allowed_domains=allowed_domains, start_urls=url)
+
 # for testing purposes
 if __name__=='__main__':
     entry()
