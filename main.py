@@ -1,30 +1,29 @@
 # LIBRARIES
 import argparse
 
-import ports
 from config import SHODAN_API_KEY
 import subprocess
 import json
-#import datetime
+import datetime
 
 # SCRIPTS
 import subdomain
 import dns_records
 import waf
-import masscan
+#import masscan # It uses masscan for port scanning
+import ports   # It uses Nmap for port scanning
 import whois
 import wappalyzer
-import shodan_tools
 from endpoint import EndpointScanTools
 import shodan_tools
 import config
 import ipfinder
 
 URL = None
-IS_SHODAN_USED = False
 SUBDOMAINS = []
 FAV_HASH = None
 
+# Function for parsing command line url
 def parse_args():
     global URL
 
@@ -42,9 +41,6 @@ def parse_args():
 
     URL = args.n
 
-    if URL:
-        IS_SHODAN_USED = args.shodan
-
 
 def shodan_api_caller(fav_hash):
     if fav_hash and config.SHODAN_API_KEY != '':
@@ -57,25 +53,27 @@ def shodan_api_caller(fav_hash):
 def find_subdomain(url):
     global SUBDOMAINS, FAV_HASH
 
+    # First find each subdomain
     st = subdomain.SubdomainTools()
     st.subfinder(url)
     subdomain_result = st.get_subdomain_json()
 
+    # Create the dictionary data structure
     new_dict = {}
     new_dict['domain'] = url
+    new_dict['Timestamp'] = config.CUR_TIME
     new_dict["favicon hash"] = shodan_tools.url(url)
     FAV_HASH = new_dict["favicon hash"] 
     new_dict['Favicon Query'] =  shodan_api_caller(FAV_HASH)
     new_dict['IP'] = ipfinder.get_ip(url)
     new_dict['Shodan'] = shodan_tools.sub_osint(config.SHODAN_API_KEY , url, new_dict['IP'])
-    #new_dict['path'] = './Subdomains/' + url + '.json'
     new_dict['whois'] = whois.whoisResult(url)
     new_dict['subdomains'] = subdomain_result[url]
     SUBDOMAINS = subdomain_result[url]
 
+    # Write the result into JSON
     with open('./Result/domain.json','w') as file:
         json.dump(new_dict, file, indent = 4)
-    #print(new_dict)
     
 def shodan_subdomain_filler(url, ip):
     if config.SHODAN_API_KEY !="":
@@ -88,12 +86,12 @@ def shodan_subdomain_filler(url, ip):
 # Level 2 json creator
 def subdomain_filler(sd, domain):
     # Create the dictionary
-    print(sd)
+    #print(sd)
 
-    
     dict_res = {} #create_dict()
     dict_res['main-domain'] = domain
     dict_res['subdomain name'] = sd
+    dict_res['Timestamp'] = config.CUR_TIME
 
     # UNCOMMENT THEM TO TEST IT
     dns_records_result = dns_records.dig(sd)
@@ -109,7 +107,7 @@ def subdomain_filler(sd, domain):
 
     dict_res['WAF'] = waf.handle_waf(sd)
 
-
+    # Fill the keys below if the target subdomain has IP ( active server)
     if dict_res['Primary IP']:
         dict_res['Shodan'] = shodan_subdomain_filler(sd, dict_res['Primary IP'])
 
@@ -118,37 +116,11 @@ def subdomain_filler(sd, domain):
         #dict_res['ports'] = masscan.portsResult(dict_res['Primary IP'])
         dict_res['ports'] = ports.portsResult(dict_res['Primary IP'])
 
-
-    #print(dict_res)
-
     return dict_res
 
-# Level 3 json creator
-def endpoint_json_filler():
-    global SUBDOMAINS
-    endpoints = []
-
-    subdomain_list = SUBDOMAINS
-    
-    est = EndpointScanTools()
-
-    for subdomain in subdomain_list:
-        try:
-            est.scrapy(allowed_domains=subdomain_list, start_urls=[f'http://{subdomain}'])
-
-        except Exception as e:
-            print(f'{e}')
-            continue
-
-        with open('tmp/endpoints.txt') as f:
-            endpoints = f.read().split('\n')
-
-        with open(f'./Result/Subdomains/{subdomain}.json','w') as file:
-            json.dump({subdomain: endpoints}, file, indent = 4)
-
+# Iterates through each subdomain and writes the resulting JSON
 def subdomain_json_filler():
     global SUBDOMAINS
-    subdomain_array_result = []
 
     subdomain_list = SUBDOMAINS
     
@@ -156,19 +128,26 @@ def subdomain_json_filler():
         try:
             #subdomain_array_result.append(subdomain_filler(subdomain,URL))
             subdomain_dict = subdomain_filler(subdomain,URL)
+
+            # Result will be stored in ($subdomain_name).json file under ./Result/Subdomains/ directory.
             with open('./Result/Subdomains/'+ subdomain + '.json', 'w') as f:
                 json.dump(subdomain_dict, f, indent = 4)
         except Exception as e:
             print(f'{e}')
             continue
 
-    #with open('./Result/Subdomains/subdomains.json','w') as file:
-    #	json.dump(subdomain_array_result, file, indent = 4)
 
+# Get the current time for Timestamp
+def get_time():
+    config.CUR_TIME = str(datetime.datetime.now())
+    print(config.CUR_TIME)
 
 def main():
     parse_args()
 
+    get_time()
+
+    # URL not provided by user
     if not URL:
         raise Exception('Provide a URL')
 
@@ -183,8 +162,6 @@ def main():
         # This is for level 2 json file
         subdomain_json_filler()
 
-        # Level 3 json file. endpoints for each subdomain
-        #endpoint_json_filler()
 
     except Exception as e:
         print(e)
