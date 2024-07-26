@@ -2,6 +2,7 @@ import mmh3
 import requests
 import codecs
 import shodan
+import dns_records
 
 def url(n):
     try:
@@ -29,14 +30,14 @@ def api(favhash=None,use_api_key=False, api_key=None):
         return None
 
 
-def sub_osint(key, domain):
+def sub_osint(key, domain, ip):
     try:
         SHODAN_API_KEY = key
         subdomain = domain
         api = shodan.Shodan(SHODAN_API_KEY)
 
         fields = ["ip_str", "port", "hostnames", "org", "isp", "asn", "os", "location", "domains", "product", "version", "cpe"]
-        results = api.search('hostname:' + subdomain, fields=fields, minify=False)
+        results = api.search('hostname:' + subdomain + ' ip:' + ip, fields=fields, minify=False)
 
         return results
 
@@ -44,9 +45,17 @@ def sub_osint(key, domain):
         print(f' Favicon hash threw exception: {e}')
         return None
 
+
+def find_ip_for_domain(url):
+    dns_records_result = dns_records.dig(url)
+    if dns_records_result != []:
+        return dns_records_result[2]
+    return None
+
 if __name__ == "__main__":
     fhash = url("https://python.org")
+    print(fhash)
     fresult = api(fhash,True,"YOUR_APİ_KEY")
-    sub_result = sub_osint('YOUR_APİ_KEY','DOMAİN')
+    sub_result = sub_osint('YOUR_APİ_KEY','DOMAİN', find_ip_for_domain('DOMAIN'))
     print(fresult)
     print(sub_result)

@@ -8,6 +8,11 @@ class SubdomainTools:
 
     def subfinder(self, domain: str):
         # Execute subfinder
+        if 'https://' in domain:
+            domain.replace('http://','')
+        if 'http://' in domain:
+            domain.replace('http://','')
+
         command = subfinder_command.format(DOMAIN=domain)
         subdomains = subprocess.check_output(command, shell=True).decode()
 

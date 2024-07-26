@@ -4,6 +4,9 @@ import subprocess
 # This array holds the result of this script
 resultDictArray = []
 
+# For not scanning
+dp = {}
+
 # These are the fields to include in the result json
 serviceKeys = [
     'name',
@@ -47,11 +50,13 @@ def dfs(node):
 
 # This is the main function that takes the ip as parameter
 def portsResult(ip):
+    if ip in dp.keys():
+        return dp[ip]
 
     global resultDictArray
     resultDictArray = []
 
-    command = 'sudo nmap -Pn -sT -sV -p 80,443 -oX ./tmp/nmap_res.xml  ' + ip #+ ' >/dev/null 2>&1 '
+    command = 'sudo nmap -Pn -sT -sV --top-ports 100 -oX ./tmp/nmap_res.xml  ' + ip #+ ' >/dev/null 2>&1 '
     subprocess.call(command, shell = True)
 
     with open('./tmp/nmap_res.xml','r') as file:
@@ -62,6 +67,7 @@ def portsResult(ip):
     root =  ET.fromstring(stringToParse)
     dfs(root)
 
+    dp[ip] = resultDictArray
     return resultDictArray
 
 if __name__=="__main__":

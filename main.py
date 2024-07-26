@@ -1,5 +1,7 @@
 # LIBRARIES
 import argparse
+
+import ports
 from config import SHODAN_API_KEY
 import subprocess
 import json
@@ -16,6 +18,7 @@ import shodan_tools
 from endpoint import EndpointScanTools
 import shodan_tools
 import config
+import ipfinder
 
 URL = None
 IS_SHODAN_USED = False
@@ -45,18 +48,14 @@ def parse_args():
 
 def shodan_api_caller(fav_hash):
     if fav_hash and config.SHODAN_API_KEY != '':
-    	dict_result = shodan_tools.api(fav_hash, True, config.SHODAN_API_KEY ) 
-    	with open('./Result/Shodan/favicon_result.json','w') as file:
-    	    json.dump(dict_result, file, indent = 4)
+        return shodan_tools.api(fav_hash, True, config.SHODAN_API_KEY )
     else:
-    	return None
+        return None
 
-	
+
 # Subdomain script caller function ( level 1 json creator )
 def find_subdomain(url):
     global SUBDOMAINS, FAV_HASH
-
-    shodan_subdomain_filler(url)
 
     st = subdomain.SubdomainTools()
     st.subfinder(url)
@@ -66,8 +65,10 @@ def find_subdomain(url):
     new_dict['domain'] = url
     new_dict["favicon hash"] = shodan_tools.url(url)
     FAV_HASH = new_dict["favicon hash"] 
-    shodan_api_caller(FAV_HASH)
-    new_dict['path'] = './Subdomains/' + url + '.json'
+    new_dict['Favicon Query'] =  shodan_api_caller(FAV_HASH)
+    new_dict['IP'] = ipfinder.get_ip(url)
+    new_dict['Shodan'] = shodan_tools.sub_osint(config.SHODAN_API_KEY , url, new_dict['IP'])
+    #new_dict['path'] = './Subdomains/' + url + '.json'
     new_dict['whois'] = whois.whoisResult(url)
     new_dict['subdomains'] = subdomain_result[url]
     SUBDOMAINS = subdomain_result[url]
@@ -76,20 +77,19 @@ def find_subdomain(url):
         json.dump(new_dict, file, indent = 4)
     #print(new_dict)
     
-def shodan_subdomain_filler(url):
+def shodan_subdomain_filler(url, ip):
     if config.SHODAN_API_KEY !="":
-        dict_result = shodan_tools.sub_osint( config.SHODAN_API_KEY , url)
+        dict_result = shodan_tools.sub_osint( config.SHODAN_API_KEY , url, ip)
         if 'total' in dict_result.keys() and dict_result['total'] > 0:
-            with open('./Result/Shodan/'+url+'.json', 'w') as file:
-                json.dump(dict_result, file, indent = 4)
+            return dict_result
+    return None
 
 
 # Level 2 json creator
 def subdomain_filler(sd, domain):
     # Create the dictionary
     print(sd)
-    
-    shodan_subdomain_filler(sd)
+
     
     dict_res = {} #create_dict()
     dict_res['main-domain'] = domain
@@ -98,7 +98,7 @@ def subdomain_filler(sd, domain):
     # UNCOMMENT THEM TO TEST IT
     dns_records_result = dns_records.dig(sd)
 
-    dict_res['Primary IP'] = None
+    dict_res['Primary IP'] = ipfinder.get_ip(sd)
 
     # If the result is non empty array.
     # This means if everything goes well
@@ -107,15 +107,16 @@ def subdomain_filler(sd, domain):
 
         dict_res['IPs'] = dns_records_result[1]
 
-        dict_res['Primary IP'] = dns_records_result[2]
-
     dict_res['WAF'] = waf.handle_waf(sd)
 
+
     if dict_res['Primary IP']:
+        dict_res['Shodan'] = shodan_subdomain_filler(sd, dict_res['Primary IP'])
+
         dict_res['Web Technologies'], dict_res['Title'] = wappalyzer.wappalyzer(sd)
 
-    if dict_res['Primary IP']: 
-        dict_res['ports'] = masscan.portsResult(dict_res['Primary IP'])
+        #dict_res['ports'] = masscan.portsResult(dict_res['Primary IP'])
+        dict_res['ports'] = ports.portsResult(dict_res['Primary IP'])
 
 
     #print(dict_res)
@@ -153,13 +154,16 @@ def subdomain_json_filler():
     
     for subdomain in subdomain_list:
         try:
-            subdomain_array_result.append(subdomain_filler(subdomain,URL))
+            #subdomain_array_result.append(subdomain_filler(subdomain,URL))
+            subdomain_dict = subdomain_filler(subdomain,URL)
+            with open('./Result/Subdomains/'+ subdomain + '.json', 'w') as f:
+                json.dump(subdomain_dict, f, indent = 4)
         except Exception as e:
             print(f'{e}')
             continue
 
-    with open('./Result/Subdomains/subdomains.json','w') as file:
-    	json.dump(subdomain_array_result, file, indent = 4)
+    #with open('./Result/Subdomains/subdomains.json','w') as file:
+    #	json.dump(subdomain_array_result, file, indent = 4)
 
 
 def main():
@@ -171,8 +175,7 @@ def main():
     try:
         # Remove the result and temporary folders and create them back
         subprocess.call('rm -rf tmp && mkdir tmp && rm -rf Result && mkdir Result \
-                        && mkdir ./Result/Subdomains \
-                        && mkdir ./Result/Shodan', shell = True)
+                        && mkdir ./Result/Subdomains ', shell = True)
 
         # This is for level 1 json file
         find_subdomain(URL)
@@ -181,7 +184,7 @@ def main():
         subdomain_json_filler()
 
         # Level 3 json file. endpoints for each subdomain
-        endpoint_json_filler()
+        #endpoint_json_filler()
 
     except Exception as e:
         print(e)
