@@ -15,4 +15,4 @@ dig_rev_dns = "dig +yaml -x {ip}"
 CUR_TIME = None
 
 # Enter your API key below
-SHODAN_API_KEY = '' #'UXFGk1nriNYhnGVLXsyRBrhEBKXMONzr'
+SHODAN_API_KEY = '' 
