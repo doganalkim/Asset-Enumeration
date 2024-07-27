@@ -62,6 +62,8 @@ Run on Terminal
 
 #### Shodan API
 
+If you want to use Shodan API, you shoould enter your API key in config.py file as string format.
+
 ```http
 	GET /shodan/host/search
 
@@ -69,7 +71,7 @@ Run on Terminal
 
 | Parameter | Type     | Description                |
 | :-------- | :------- | :------------------------- |
-| `api_key` | `string` | **Required**. Your Shodan API key |
+| `api_key` | `string` | **Optional**. Your Shodan API key |
 
 ## Features
 
