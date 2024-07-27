@@ -11,8 +11,6 @@ This tool aims to determine all attack surfaces of the given target in URL forma
 - [@doganalkim](https://github.com/doganalkim)
 
 
-
-
 ## Run on Docker
 
 1 - Clone the repository.
@@ -37,7 +35,25 @@ This tool aims to determine all attack surfaces of the given target in URL forma
     python3 flask_app.py
 ```
 
+
 6 - Open your browser and go to http://127.0.0.1:5000
+
+    
+
+## Run Locally
+
+Get help
+
+```bash
+  python3 main -h
+```
+
+
+Run on Terminal
+
+```bash
+  python3 main -u $TARGET_URL
+```
 
     
 
