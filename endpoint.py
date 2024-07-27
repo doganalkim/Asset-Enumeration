@@ -18,8 +18,8 @@ class EndpointScanTools:
 @click.option('--allowed_domains', required=True, help='A list of domains separated by commas. '
                                                        'Spider will only visit the links in these domains.')
 def entry(url, allowed_domains):
-    url = url.split(',')
-    allowed_domains = allowed_domains.split(',')
+    url = url.replace(' ', '').split(',')
+    allowed_domains = allowed_domains.replace(' ', '').split(',')
 
     est = endpoint.EndpointScanTools()
     est.scrapy(allowed_domains=allowed_domains, start_urls=url)
