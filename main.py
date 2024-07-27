@@ -143,8 +143,12 @@ def subdomain_json_filler():
 def get_time():
     config.CUR_TIME = str(datetime.datetime.now())
 
-def main():
-    parse_args()
+def main(url=None):
+    global URL
+    if url:
+        URL = url
+    else:
+        parse_args()
 
     get_time()
 
