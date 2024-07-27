@@ -33,9 +33,10 @@ def parse_args():
                         metavar='',
                         help='Enter the target URL address')
 
-    parser.add_argument('-s', '--shodan',
-                        action='store_true',
-                        help='Enter this parameter to use your Shodan API key')
+    #  This may be used in the future for Shodan part
+    #parser.add_argument('-s', '--shodan',
+    #                    action='store_true',
+    #                    help='Enter this parameter to use your Shodan API key')
 
     args = parser.parse_args()
 
@@ -66,6 +67,7 @@ def find_subdomain(url):
     FAV_HASH = new_dict["favicon hash"] 
     new_dict['Favicon Query'] =  shodan_api_caller(FAV_HASH)
     new_dict['IP'] = ipfinder.get_ip(url)
+    new_dict['WAF'] = waf.handle_waf(url)
     new_dict['Shodan'] = shodan_tools.sub_osint(config.SHODAN_API_KEY , url, new_dict['IP'])
     new_dict['whois'] = whois.whoisResult(url)
     new_dict['subdomains'] = subdomain_result[url]
@@ -140,7 +142,6 @@ def subdomain_json_filler():
 # Get the current time for Timestamp
 def get_time():
     config.CUR_TIME = str(datetime.datetime.now())
-    print(config.CUR_TIME)
 
 def main():
     parse_args()
