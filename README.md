@@ -12,6 +12,36 @@ This tool aims to determine all attack surfaces of the given target in URL forma
 
 
 
+
+## Run on Docker
+
+1 - Clone the repository.
+
+2 - Build the Docker image.
+```bash
+    sudo docker build -t kali .
+```
+
+3 - Run the container.
+```bash
+    sudo docker run -i -t --name assetenumeration -p 5000:5000 -v $(pwd):/root:rw kali
+```
+
+4 - Install the requirements
+```
+    pip3 install -r requirements.txt
+```
+
+5 - Run flask
+```bash
+    python3 flask_app.py
+```
+
+6 - Open your browser and go to http://127.0.0.1:5000
+
+    
+
+
 ![Logo](https://media.istockphoto.com/id/1383933495/vector/hacker-symbol.jpg?s=612x612&w=0&k=20&c=fFR3n51RetENXUg8st7kGoO-ErvWA__ZDEE7CPn-9KM=)
 
 ## Features
