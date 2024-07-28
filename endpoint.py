@@ -3,6 +3,7 @@ from scrapy.crawler import CrawlerProcess
 
 from scrapy_spider.scrapy_spider.spiders.scrapy_spider import SubdomainSpider
 from config import SPIDER_DEPTH
+from main import _save_endpoints
 
 
 class EndpointScanTools:
@@ -21,8 +22,10 @@ def entry(url, allowed_domains):
     url = url.replace(' ', '').split(',')
     allowed_domains = allowed_domains.replace(' ', '').split(',')
 
-    est = endpoint.EndpointScanTools()
+    est = EndpointScanTools()
     est.scrapy(allowed_domains=allowed_domains, start_urls=url)
+
+    _save_endpoints('_'.join(allowed_domains))
 
 # for testing purposes
 if __name__=='__main__':

@@ -14,7 +14,6 @@ import waf
 import ports   # It uses Nmap for port scanning
 import whois
 import wappalyzer
-from endpoint import EndpointScanTools
 import shodan_tools
 import config
 import ipfinder
@@ -143,6 +142,24 @@ def subdomain_json_filler():
 def get_time():
     config.CUR_TIME = str(datetime.datetime.now())
 
+# Save the endpoints in tmp directory to Result directory in JSON format.
+# Also adds a timestamp.
+def _save_endpoints(filename: str):
+    filename = filename.replace(' ', '').replace(',', '_').replace('.', '-')
+    
+    with open('./tmp/endpoints.txt') as f:
+        endpoints = f.read().split('\n')
+
+    dct = {
+        "Timestamp": config.CUR_TIME,
+        "Endpoints": endpoints
+    }
+
+    subprocess.call('mkdir -p ./Result/Endpoints ', shell = True)
+
+    with open('./Result/Endpoints/'+ filename + '.json', 'w') as f:
+        json.dump(dct, f, indent = 4)
+
 def main(url=None):
     global URL
     if url:
@@ -170,6 +187,10 @@ def main(url=None):
 
     except Exception as e:
         print(e)
+        return "failed"
+
+    return "success"
 
 if __name__ == "__main__":
     main()
+    
