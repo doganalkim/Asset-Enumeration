@@ -55,4 +55,4 @@ def handle_spider(data):
         emit('message', {'status': 'error', 'message': 'Spider script failed'})
 
 if __name__ == '__main__':
-    socketio.run(app, debug=True)
+    socketio.run(app,host = ("0.0.0.0"), debug=True)

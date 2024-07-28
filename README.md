@@ -11,8 +11,6 @@ This tool aims to determine all attack surfaces of the given target in URL forma
 - [@doganalkim](https://github.com/doganalkim)
 
 
-
-
 ## Run on Docker
 
 1 - Clone the repository.
@@ -37,12 +35,43 @@ This tool aims to determine all attack surfaces of the given target in URL forma
     python3 flask_app.py
 ```
 
+
 6 - Open your browser and go to http://127.0.0.1:5000
 
     
+## Run Locally
 
+Get help
+
+```bash
+  python3 main.py -h
+```
+
+
+Run on Terminal
+
+```bash
+  python3 main.py -u $TARGET_URL
+```
+
+   
 
 ![Logo](https://media.istockphoto.com/id/1383933495/vector/hacker-symbol.jpg?s=612x612&w=0&k=20&c=fFR3n51RetENXUg8st7kGoO-ErvWA__ZDEE7CPn-9KM=)
+
+## API Reference
+
+#### Shodan API
+
+If you want to use Shodan API, you shoould enter your API key in config.py file as string format.
+
+```http
+	GET /shodan/host/search
+
+```
+
+| Parameter | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `api_key` | `string` | **Optional**. Your Shodan API key |
 
 ## Features
 
