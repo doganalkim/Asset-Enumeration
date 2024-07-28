@@ -3,29 +3,62 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Run Script</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.3.2/socket.io.min.js"></script>
+    <title>Script Runner</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.3.2/socket.io.js"></script>
+    <style>
+        .running { display: none; }
+        .running.show { display: block; }
+        .message { display: none; }
+        .message.show { display: block; }
+    </style>
 </head>
 <body>
-    <h1>Run Python Script</h1>
-    <label for="args">Arguments (comma separated): </label>
-    <input type="text" id="args" placeholder="arg1 arg2 arg3">
-    <button onclick="runScript()">Run Script</button>
-    <pre id="output"></pre>
+    <h1>Script Runner</h1>
+
+    <div>
+        <h2>Asset Enumeration</h2>
+        <input type="text" id="domain" placeholder="Target Domain"> <p>Target domain name (example.com) [required]</p>
+        <button onclick="runAssetEnumeration()">Run Script</button>
+    </div>
+
+    <div>
+        <h2>Endpoint Spider</h2>
+        <input type="text" id="spider-domain" placeholder="Target URL(s)"> <p>URL(s) to spider. Separated by commas.  [required]</p>
+        <input type="text" id="allowed-domains" placeholder="Allowed Domains"> <p>A list of domains separated by commas. Spider will only visit the links in these domains.  [required]</p>
+        <button onclick="runSpider()">Run Script</button><br><br>
+    </div>
+
+    <div class="running" id="running">Running...</div>
+    <div class="message" id="message"></div>
+
     <script>
-        const socket = io();
+        var socket = io();
 
-        function runScript() {
-            document.getElementById('output').textContent = '';  // Clear previous output
-            const argsInput = document.getElementById('args').value;
-            const args = argsInput.split(' ').map(arg => arg.trim());
-
-            socket.emit('run_script', { args: args });
+        function runAssetEnumeration() {
+            var domain = document.getElementById('domain').value;
+            document.getElementById('running').classList.add('show');
+            document.getElementById('message').classList.remove('show');
+            socket.emit('run_asset_enumeration', { domain: domain });
         }
 
-        socket.on('script_output', function(msg) {
-            const outputElement = document.getElementById('output');
-            outputElement.textContent += msg.output + '\n';
+        function runSpider() {
+            var domain = document.getElementById('spider-domain').value;
+            var allowedDomains = document.getElementById('allowed-domains').value;
+            document.getElementById('running').classList.add('show');
+            document.getElementById('message').classList.remove('show');
+            socket.emit('run_spider', { domain: domain, allowed_domains: allowedDomains });
+        }
+
+        socket.on('message', function(data) {
+            document.getElementById('running').classList.remove('show');
+            var messageDiv = document.getElementById('message');
+            messageDiv.classList.add('show');
+            messageDiv.textContent = data.message;
+            if (data.status === 'error') {
+                messageDiv.style.color = 'red';
+            } else {
+                messageDiv.style.color = 'green';
+            }
         });
     </script>
 </body>
