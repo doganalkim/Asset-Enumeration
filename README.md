@@ -44,14 +44,14 @@ This tool aims to determine all attack surfaces of the given target in URL forma
 Get help
 
 ```bash
-  python3 main -h
+  python3 main.py -h
 ```
 
 
 Run on Terminal
 
 ```bash
-  python3 main -u $TARGET_URL
+  python3 main.py -u $TARGET_URL
 ```
 
    
