@@ -81,7 +81,7 @@ def sub_osint(key, domain, ip=None):
 if __name__ == "__main__":
     fhash = get_favicon_url("https://bugs.python.org")
     print(fhash)
-    fresult = api(fhash,True,"xZQvxLpwo7ecmrEIYSLG0O7M6bOabAgi")
-    sub_result = sub_osint('xZQvxLpwo7ecmrEIYSLG0O7M6bOabAgi','bugs.python.org')
+    fresult = api(fhash,True,"YOUR_API_KEY")
+    sub_result = sub_osint('YOUR_APİ_KEY','DOMAİN')
     print(fresult)
     print(sub_result)
