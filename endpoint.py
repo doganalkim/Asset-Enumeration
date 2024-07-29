@@ -1,10 +1,11 @@
 import click
 from scrapy.crawler import CrawlerProcess
+import json
 
 from scrapy_spider.scrapy_spider.spiders.scrapy_spider import SubdomainSpider
 from config import SPIDER_DEPTH
 from main import _save_endpoints
-
+import js_endpoint_discovery
 
 class EndpointScanTools:
     # outputs to endpoints.txt file
@@ -26,7 +27,9 @@ def entry(url, allowed_domains):
     est.scrapy(allowed_domains=allowed_domains, start_urls=url)
 
     _save_endpoints('_'.join(allowed_domains))
-
+    js_find = js_endpoint_discovery.linkfinder(url[0])
+    with open('./Result/Endpoints/'+ "js_endpoint" + '.json', 'w') as f:
+    	json.dump(js_find,f,indent=4)
 # for testing purposes
 if __name__=='__main__':
     entry()
