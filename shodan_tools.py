@@ -42,7 +42,7 @@ def get_favicon_url(site_url):
                 if base_url in full_icon_url:
                     return get_favicon_hash(full_icon_url)
 
-            return "Favicon not found"
+            return None
         except requests.RequestException as e:
             return e
 
