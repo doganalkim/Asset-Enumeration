@@ -6,7 +6,7 @@ python-Wappalyzer==0.3.1
 PyYAML==6.0.1
 Requests==2.32.3
 Scrapy==2.11.2
-shodan==1.28.0
+shodan==1.31.0
 Wappalyzer==1.0
 Flask==3.0.3
 Flask-SocketIO==5.3.6
