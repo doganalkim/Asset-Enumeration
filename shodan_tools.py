@@ -24,27 +24,29 @@ def get_favicon_url(site_url):
     try:
         return get_favicon_hash(favicon_url)
     except Exception as e:
+        print(f'get_favicon_url threw exception: {e}')
 
-        try:
-            parsed_url = urlparse(site_url)
-            base_url = f"{parsed_url.scheme}://{parsed_url.netloc}"
+    try:
+        parsed_url = urlparse(site_url)
+        base_url = f"{parsed_url.scheme}://{parsed_url.netloc}"
 
-            response = requests.get(site_url)
-            response.raise_for_status()
+        response = requests.get(site_url)
+        response.raise_for_status()
 
-            soup = BeautifulSoup(response.text, 'html.parser')
-            icon_links = soup.find_all("link", rel=lambda x: x and 'icon' in x.lower())
+        soup = BeautifulSoup(response.text, 'html.parser')
+        icon_links = soup.find_all("link", rel=lambda x: x and 'icon' in x.lower())
 
-            for icon_link in icon_links:
-                icon_url = icon_link['href']
-                full_icon_url = urljoin(base_url, icon_url)
+        for icon_link in icon_links:
+            icon_url = icon_link['href']
+            full_icon_url = urljoin(base_url, icon_url)
 
-                if base_url in full_icon_url:
-                    return get_favicon_hash(full_icon_url)
+            if base_url in full_icon_url:
+                return get_favicon_hash(full_icon_url)
 
-            return None
-        except requests.RequestException as e:
-            return e
+        return None
+    except requests.RequestException as e:
+        return e
+    return None
 
 def api(favhash=None,use_api_key=False, api_key=None):
     try:

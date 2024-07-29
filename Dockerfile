@@ -32,6 +32,9 @@ RUN apt-get update && \
 RUN go install -v github.com/projectdiscovery/subfinder/v2/cmd/subfinder@latest
 RUN cp /root/go/bin/subfinder  /usr/bin/
 
+# Install LinkFinder
+RUN git clone https://github.com/GerbenJavado/LinkFinder.git
+
 # Copy the project into root directory
 WORKDIR /root
 COPY . .

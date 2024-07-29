@@ -165,3 +165,6 @@ Result/
 tmp/
 .idea/
 paused.conf
+
+# Bash History
+.bash_history
