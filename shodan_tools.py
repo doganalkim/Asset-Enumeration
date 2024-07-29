@@ -2,27 +2,57 @@ import mmh3
 import requests
 import codecs
 import shodan
-import dns_records
+from urllib.parse import urlparse, urljoin
+from bs4 import BeautifulSoup
 
-def url(n):
-    try:
-        if "http" not in n:
-    	    n = "http://" + n
-        n += '/favicon.ico'
-        response = requests.get(n,verify=False)
+
+def get_favicon_hash(url):
+    response = requests.get(url, verify=False)
+    if response.status_code == 200:
         favicon = codecs.encode(response.content, 'base64')
-        hash = mmh3.hash(favicon)
-        return 'http.favicon.hash:' + str(hash)
+        hash_value = mmh3.hash(favicon)
+        return 'http.favicon.hash:' + str(hash_value)
+    else:
+        raise Exception("Favicon not found")
+
+
+def get_favicon_url(site_url):
+    if "http" not in site_url:
+        site_url = "http://" + site_url
+
+    favicon_url = site_url + '/favicon.ico'
+    try:
+        return get_favicon_hash(favicon_url)
     except Exception as e:
-    	print(f' Favicon hash threw exception: {e}')
-    	return None
+
+        try:
+            parsed_url = urlparse(site_url)
+            base_url = f"{parsed_url.scheme}://{parsed_url.netloc}"
+
+            response = requests.get(site_url)
+            response.raise_for_status()
+
+            soup = BeautifulSoup(response.text, 'html.parser')
+            icon_links = soup.find_all("link", rel=lambda x: x and 'icon' in x.lower())
+
+            for icon_link in icon_links:
+                icon_url = icon_link['href']
+                full_icon_url = urljoin(base_url, icon_url)
+
+                if base_url in full_icon_url:
+                    return get_favicon_hash(full_icon_url)
+
+            return "Favicon not found"
+        except requests.RequestException as e:
+            return e
 
 def api(favhash=None,use_api_key=False, api_key=None):
     try:
         if use_api_key:
             if api_key and favhash:
                 key = shodan.Shodan(api_key)
-                fields = ["ip_str", "port", "hostnames", "org", "isp", "asn", "os", "location", "domains", "product", "version", "cpe"]
+                fields = ["timestamp", "ip_str", "port", "hostnames", "location", "org", "isp", "os", "timestamp", "domains", "asn", "title", "product", "version", "cpe", "cve", "tags", "hash", "transport", "ssl", "uptime", "link", "type", "info", "host", "device_type", "device", "telnet", "ssh", "ftp", "smtp", "service", "service_type", "banner"]
+                #fields = ["ip_str", "port", "hostnames", "org", "isp", "asn", "os", "location", "domains", "product", "version", "cpe"]
                 result = key.search(favhash, fields=fields, minify=False)
             return result
     except Exception as e:
@@ -30,15 +60,17 @@ def api(favhash=None,use_api_key=False, api_key=None):
         return None
 
 
-def sub_osint(key, domain, ip):
+def sub_osint(key, domain, ip=None):
     try:
         SHODAN_API_KEY = key
         subdomain = domain
         api = shodan.Shodan(SHODAN_API_KEY)
-
-        fields = ["ip_str", "port", "hostnames", "org", "isp", "asn", "os", "location", "domains", "product", "version", "cpe"]
-        results = api.search('hostname:' + subdomain + ' ip:' + ip, fields=fields, minify=False)
-
+        fields = ["timestamp", "ip_str", "port", "hostnames", "location", "org", "isp", "os", "domains", "asn", "title", "product", "version", "cpe", "cve", "tags", "hash", "transport", "ssl", "uptime", "link", "type", "info", "host", "device_type", "device", "telnet", "ssh", "ftp", "smtp", "service", "service_type", "banner"]
+        #fields = ["ip_str", "port", "hostnames", "org", "isp", "asn", "os", "location", "domains", "product", "version", "cpe"]
+        if ip!=None:
+            results = api.search('hostname:' + subdomain + ' ip:' + ip, fields=fields, minify=False)
+        else:
+            results = api.search('hostname:' + subdomain, fields=fields, minify=False)
         return results
 
     except Exception as e:
@@ -46,16 +78,10 @@ def sub_osint(key, domain, ip):
         return None
 
 
-def find_ip_for_domain(url):
-    dns_records_result = dns_records.dig(url)
-    if dns_records_result != []:
-        return dns_records_result[2]
-    return None
-
 if __name__ == "__main__":
-    fhash = url("https://python.org")
+    fhash = get_favicon_url("https://bugs.python.org")
     print(fhash)
-    fresult = api(fhash,True,"YOUR_APİ_KEY")
-    sub_result = sub_osint('YOUR_APİ_KEY','DOMAİN', find_ip_for_domain('DOMAIN'))
+    fresult = api(fhash,True,"xZQvxLpwo7ecmrEIYSLG0O7M6bOabAgi")
+    sub_result = sub_osint('xZQvxLpwo7ecmrEIYSLG0O7M6bOabAgi','bugs.python.org')
     print(fresult)
     print(sub_result)

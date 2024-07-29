@@ -62,8 +62,8 @@ def find_subdomain(url):
     new_dict = {}
     new_dict['domain'] = url
     new_dict['Timestamp'] = config.CUR_TIME
-    new_dict["favicon hash"] = shodan_tools.url(url)
-    FAV_HASH = new_dict["favicon hash"] 
+    new_dict["Favicon hash"] = shodan_tools.get_favicon_url(url)
+    FAV_HASH = new_dict["Favicon hash"] 
     new_dict['Favicon Query'] =  shodan_api_caller(FAV_HASH)
     new_dict['IP'] = ipfinder.get_ip(url)
     new_dict['WAF'] = waf.handle_waf(url)
@@ -76,9 +76,9 @@ def find_subdomain(url):
     with open('./Result/domain.json','w') as file:
         json.dump(new_dict, file, indent = 4)
     
-def shodan_subdomain_filler(url, ip):
+def shodan_subdomain_filler(url):
     if config.SHODAN_API_KEY !="":
-        dict_result = shodan_tools.sub_osint( config.SHODAN_API_KEY , url, ip)
+        dict_result = shodan_tools.sub_osint( config.SHODAN_API_KEY , url)
         if 'total' in dict_result.keys() and dict_result['total'] > 0:
             return dict_result
     return None
@@ -110,8 +110,10 @@ def subdomain_filler(sd, domain):
 
     # Fill the keys below if the target subdomain has IP ( active server)
     if dict_res['Primary IP']:
-        dict_res['Shodan'] = shodan_subdomain_filler(sd, dict_res['Primary IP'])
-
+        dict_res['Favicon hash'] = shodan_tools.get_favicon_url(sd)
+        FAVİCON_HASH = dict_res["Favicon hash"] 
+        dict_res['Favicon Query'] =  shodan_api_caller(FAVİCON_HASH)
+        dict_res['Shodan'] = shodan_subdomain_filler(sd)
         dict_res['Web Technologies'], dict_res['Title'] = wappalyzer.wappalyzer(sd)
 
         #dict_res['ports'] = masscan.portsResult(dict_res['Primary IP'])
