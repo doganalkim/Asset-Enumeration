@@ -10,3 +10,4 @@ shodan==1.31.0
 Wappalyzer==1.0
 Flask==3.0.3
 Flask-SocketIO==5.3.6
+jsbeautifier==1.15.1

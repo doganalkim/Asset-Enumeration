@@ -28,7 +28,7 @@ def linkfinder(url):
 		with open('temp.js', 'w', encoding='utf-8') as file:
 			file.write(js_content)
 
-		result = subprocess.run(['../LinkFinder/linkfinder.py', '-i', 'temp.js', '-o', 'cli'], capture_output=True, text=True)
+		result = subprocess.run(['python3','../LinkFinder/linkfinder.py', '-i', 'temp.js', '-o', 'cli'], capture_output=True, text=True)
 		endpoints = result.stdout.splitlines()
 		result_dict[js_url] = endpoints
 		os.remove('temp.js')
