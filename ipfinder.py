@@ -11,4 +11,4 @@ def get_ip(domain):
   
   
 if __name__ == '__main__':
-    print(get_ip('toscrape.com'))
+    print(get_ip('python.org'))
