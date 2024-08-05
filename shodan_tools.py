@@ -13,7 +13,7 @@ def get_favicon_hash(url):
         hash_value = mmh3.hash(favicon)
         return 'http.favicon.hash:' + str(hash_value)
     else:
-        raise Exception("Favicon not found")
+        raise Exception("Favicon")
 
 
 def get_favicon_url(site_url):
