@@ -7,14 +7,16 @@ from bs4 import BeautifulSoup
 
 
 def get_favicon_hash(url):
-    response = requests.get(url, verify=False)
-    if response.status_code == 200:
-        favicon = codecs.encode(response.content, 'base64')
-        hash_value = mmh3.hash(favicon)
-        return 'http.favicon.hash:' + str(hash_value)
-    else:
-        raise Exception("Favicon")
-
+    try:
+        response = requests.get(url, verify=False)
+        if response.status_code == 200:
+            favicon = codecs.encode(response.content, 'base64')
+            hash_value = mmh3.hash(favicon)
+            return 'http.favicon.hash:' + str(hash_value)
+        else:
+            raise Exception("Favicon")
+    except Exception as e:
+        print(f'{e}')
 
 def get_favicon_url(site_url):
     if "http" not in site_url:

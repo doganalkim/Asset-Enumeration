@@ -68,7 +68,7 @@ def find_subdomain(url):
     new_dict['Timestamp'] = config.CUR_TIME
     new_dict['IPs'] = dns_result[1]
     new_dict["Favicon hash"] = shodan_tools.get_favicon_url(url)
-    FAV_HASH = new_dict["Favicon hash"] 
+    FAV_HASH = new_dict["Favicon hash"]
     new_dict['Favicon Query'] =  shodan_api_caller(FAV_HASH)
     new_dict['WAF'] = waf.handle_waf(url)
     for ip in new_dict['IPs']:
@@ -78,11 +78,12 @@ def find_subdomain(url):
     new_dict['whois'] = whois.whoisResult(url)
     new_dict['subdomains'] = subdomain_result[url]
     SUBDOMAINS = subdomain_result[url]
-
-    # Write the result into JSON
-    with open('./Result/domain.json','w') as file:
-        json.dump(new_dict, file, indent = 4)
-    
+    try:
+        # Write the result into JSON
+        with open('./Result/domain.json','w') as file:
+            json.dump(new_dict, file, indent = 4)
+    except Exception as e:
+            print(f'{e}')
 def shodan_subdomain_filler(url):
     if config.SHODAN_API_KEY !="":
         dict_result = shodan_tools.sub_osint( config.SHODAN_API_KEY , url)

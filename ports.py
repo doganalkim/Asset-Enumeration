@@ -12,7 +12,8 @@ serviceKeys = [
     'name',
     'product',
     'version',
-    'service'
+    'service',
+    'state'
     ]
 
 # Function for parsing service
@@ -22,6 +23,8 @@ def handle_service(service, dictResult):
     for key,value in attribs.items():
         if key in serviceKeys:
             dictResult[key] = value
+            
+    
 
     return dictResult
 
@@ -34,7 +37,7 @@ def handle_port(port):
         dictResult[key] = value
 
     for child in port:
-        if child.tag == 'service':
+        if child.tag == 'service' or 'state':
             dictResult = handle_service(child,dictResult)
 
     resultDictArray.append(dictResult)
@@ -56,11 +59,11 @@ def portsResult(ip):
     global resultDictArray
     resultDictArray = []
 
-    command = 'sudo nmap -Pn -sT -sV --top-ports 100 -oX ./tmp/nmap_res.xml  ' + ip #+ ' >/dev/null 2>&1 '
+    command = 'sudo nmap -Pn -sT -sV -vv --top-ports 100 -oX ./tmp/nmap_res.xml  ' + ip #+ ' >/dev/null 2>&1 '
     subprocess.call(command, shell = True)
 
     with open('./tmp/nmap_res.xml','r') as file:
-        stringToParse = file.read()
+        stringToParse = file.read()       
 
     subprocess.call('rm -rf ./tmp/nmap_res.xml', shell = True)
 
